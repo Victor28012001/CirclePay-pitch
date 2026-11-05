@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CirclePay — Pitch Deck</title>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #121820;
+    --border: #232b36;
+    --text: #e8eef5;
+    --muted: #8892a0;
+    --accent: #14f195;
+    --accent-dim: rgba(20, 241, 149, 0.1);
+    --gold: #f5b914;
+    --gold-dim: rgba(245, 185, 20, 0.1);
+    --blue: #4d9fff;
+    --blue-dim: rgba(77, 159, 255, 0.1);
+    --red: #ff5e5e;
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Slide container ── */
+  .deck {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5rem 1.5rem 4rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateY(10px);
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* ── Background decorations ── */
+  .bg-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .bg-decor svg { position: absolute; opacity: 0.55; }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+  }
+
+  .blob-green { background: radial-gradient(circle, var(--accent), transparent 70%); }
+  .blob-blue  { background: radial-gradient(circle, var(--blue), transparent 70%); }
+  .blob-gold  { background: radial-gradient(circle, var(--gold), transparent 70%); }
+
+  .dot-grid {
+    position: absolute;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.09) 1px, transparent 1px);
+    background-size: 22px 22px;
+    z-index: 0;
+  }
+
+  .ring-decor {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(20, 241, 149, 0.12);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ring-decor::before,
+  .ring-decor::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(20, 241, 149, 0.08);
+  }
+
+  .ring-decor::before { inset: 14%; }
+  .ring-decor::after  { inset: 30%; }
+
+  .line-grid {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,0.025) 0px,
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px,
+      transparent 14px
+    );
+  }
+
+  /* ── Title / close background image ── */
+  .brand-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url("./circlepay.png");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.22;
+    filter: saturate(1.1) contrast(1.05);
+  }
+
+  /* Soft fade so edges melt into the dark bg */
+  .brand-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at center, transparent 20%, rgba(10,14,20,0.85) 75%),
+      linear-gradient(180deg, rgba(10,14,20,0.6), rgba(10,14,20,0.2) 30%, rgba(10,14,20,0.2) 70%, rgba(10,14,20,0.7));
+    pointer-events: none;
+  }
+
+  .inner {
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    max-height: 100%;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .inner::-webkit-scrollbar { width: 0; }
+  .inner { scrollbar-width: none; }
+
+  .num {
+    position: absolute;
+    top: 1.6rem; right: 1.6rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    z-index: 3;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+    background: rgba(10, 14, 20, 0.86);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .brand {
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .dots {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .dots button {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .dots button:hover { background: var(--muted); }
+
+  .dots button.active {
+    background: var(--accent);
+    transform: scale(1.4);
+  }
+
+  .nav-right { display: flex; gap: 0.4rem; align-items: center; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 7px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn.nav-arrow { padding: 0.4rem 0.6rem; font-size: 0.9rem; }
+
+  /* ── Typography ── */
+  h1 {
+    font-size: clamp(2rem, 5.5vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 3.6vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    margin-bottom: 1.2rem;
+  }
+
+  .kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.7rem;
+  }
+
+  .lead {
+    font-size: 1.02rem;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.55;
+    text-shadow: 0 1px 20px rgba(0,0,0,0.4);
+  }
+
+  /* ── Hero ── */
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(20, 241, 149, 0.35);
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(8px);
+  }
+
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.6rem;
+  }
+
+  .hero-links span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: rgba(18, 24, 32, 0.85);
+    backdrop-filter: blur(8px);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hero-links span b { color: var(--text); font-weight: 600; }
+
+  /* ── Stat strip ── */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.9rem;
+    margin-top: 1.6rem;
+  }
+
+  .stat {
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: rgba(18, 24, 32, 0.85);
+    backdrop-filter: blur(8px);
+  }
+
+  .stat .val {
+    font-size: clamp(1.25rem, 2.8vw, 1.65rem);
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .stat .cap {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.35rem;
+    line-height: 1.4;
+  }
+
+  /* ── Founder note ── */
+  .founder-note {
+    border-left: 2px solid var(--accent);
+    padding: 0.4rem 0 0.4rem 1.2rem;
+    margin-top: 1.4rem;
+    font-size: 0.98rem;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 620px;
+  }
+
+  .founder-note strong { color: var(--text); }
+
+  /* ── Grids ── */
+  .grid { display: grid; gap: 0.85rem; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.15rem;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: #2f3a48; }
+
+  .card .label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.45rem;
+  }
+
+  .card h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .card p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .card .big {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 0.25rem;
+  }
+
+  .card .big.gold { color: var(--gold); }
+  .card .big.blue { color: var(--blue); }
+
+  /* ── Problem/Solution ── */
+  .ps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+    margin-top: 1.1rem;
+  }
+
+  .ps-card {
+    border-radius: var(--radius);
+    padding: 1.2rem 1.3rem;
+    border: 1px solid var(--border);
+  }
+
+  .ps-card.problem {
+    background: rgba(255, 94, 94, 0.05);
+    border-color: rgba(255, 94, 94, 0.25);
+  }
+
+  .ps-card.solution {
+    background: var(--accent-dim);
+    border-color: rgba(20, 241, 149, 0.3);
+  }
+
+  .ps-card .tag {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .ps-card.problem .tag { color: var(--red); }
+  .ps-card.solution .tag { color: var(--accent); }
+
+  .ps-card p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  .ps-card .punch {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text);
+    margin-top: 0.4rem;
+  }
+
+  /* ── List ── */
+  .list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; margin-top: 1rem; }
+
+  .list li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .list .m {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 800;
+    margin-top: 2px;
+    border: 1px solid;
+  }
+
+  .m.green { background: var(--accent-dim); color: var(--accent); border-color: rgba(20,241,149,0.4); }
+  .m.gold { background: var(--gold-dim); color: var(--gold); border-color: rgba(245,185,20,0.4); }
+  .m.blue { background: var(--blue-dim); color: var(--blue); border-color: rgba(77,159,255,0.4); }
+
+  .list strong { color: var(--text); }
+
+  /* ── Timeline ── */
+  .timeline { position: relative; padding-left: 1.8rem; margin-top: 1.1rem; }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 6px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--border);
+  }
+
+  .tl { position: relative; padding-bottom: 1.1rem; }
+  .tl:last-child { padding-bottom: 0; }
+
+  .tl::before {
+    content: "";
+    position: absolute;
+    left: -1.8rem;
+    top: 5px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--border);
+  }
+
+  .tl.done::before { border-color: var(--accent); background: var(--accent-dim); }
+  .tl.next::before { border-color: var(--gold); background: var(--gold-dim); }
+  .tl.later::before { border-color: var(--blue); background: var(--blue-dim); }
+
+  .tl .q {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    margin-bottom: 0.25rem;
+  }
+
+  .tl.done .q { background: var(--accent-dim); color: var(--accent); }
+  .tl.next .q { background: var(--gold-dim); color: var(--gold); }
+  .tl.later .q { background: var(--blue-dim); color: var(--blue); }
+
+  .tl h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 0.1rem; line-height: 1.3; }
+  .tl p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── Team ── */
+  .team-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.3rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .avatar {
+    flex-shrink: 0;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--bg);
+    letter-spacing: -0.02em;
+  }
+
+  .team-card h3 { font-size: 0.98rem; font-weight: 700; margin-bottom: 0.1rem; }
+
+  .team-card .role {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .team-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── Close ── */
+  .close { text-align: center; }
+
+  .close h1 {
+    background: linear-gradient(135deg, var(--accent), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.1rem;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 30px rgba(0,0,0,0.5));
+  }
+
+  .close .lead { margin: 0 auto 1.8rem; }
+
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    margin-top: 1.2rem;
+  }
+
+  .contact span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: rgba(18, 24, 32, 0.85);
+    backdrop-filter: blur(8px);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .contact a { color: inherit; text-decoration: none; }
+  .contact a:hover { color: var(--accent); }
+
+  /* ── Progress bar ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: var(--accent);
+    width: 0%;
+    z-index: 1000;
+    transition: width 0.15s ease;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 720px) {
+    .slide { padding: 4.6rem 1.1rem 1.5rem; }
+    .num { top: 4.4rem; right: 1rem; font-size: 0.62rem; }
+    .dots { display: none; }
+    .ps { grid-template-columns: 1fr; }
+    .team-card { flex-direction: column; }
+    .blob { opacity: 0.22; }
+    .brand-bg { opacity: 0.16; }
+    .stat-strip { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+    .hero-links span, .contact span { font-size: 0.72rem; padding: 0.35rem 0.7rem; }
+    .topbar { padding: 0.5rem 0.8rem; }
+    .brand { font-size: 0.82rem; }
+    .btn { padding: 0.35rem 0.7rem; font-size: 0.72rem; }
+    .inner { max-height: calc(100vh - 6rem); overflow-y: auto; }
+  }
+
+  /* ── Print (one slide per page) ── */
+  @media print {
+    @page { size: 16in 9in; margin: 0; }
+    html, body { height: auto; overflow: visible; background: #fff; color: #111; }
+    .topbar, #progress, .bg-decor, .blob, .dot-grid, .ring-decor, .line-grid, .num { display: none !important; }
+    .deck { position: static; overflow: visible; }
+    .slide {
+      position: static;
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: none !important;
+      pointer-events: auto;
+      min-height: 100vh;
+      page-break-after: always;
+      break-after: page;
+      padding: 2rem 2.5rem;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      background: #fff;
+    }
+    .slide:last-child { page-break-after: auto; break-after: auto; }
+    .inner { max-height: none; overflow: visible; }
+    /* Keep the brand image in the PDF, but lighter */
+    .brand-bg { opacity: 0.12; }
+    .brand-bg::after {
+      background:
+        radial-gradient(ellipse at center, transparent 30%, rgba(255,255,255,0.9) 80%),
+        linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3) 30%, rgba(255,255,255,0.3) 70%, rgba(255,255,255,0.8));
+    }
+    .card, .hero-links span, .contact span, .team-card, .stat, .ps-card { background: #f5f5f5 !important; border-color: #ddd !important; }
+    .lead, .card p, .tl p, .team-card p, .founder-note, .stat .cap, .ps-card p { color: #444 !important; }
+    h1, .lead { text-shadow: none; }
+    .close h1 { -webkit-text-fill-color: #14a06a; filter: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div class="topbar">
+  <span class="brand">CirclePay</span>
+  <div class="dots" id="dots"></div>
+  <div class="nav-right">
+    <button class="btn nav-arrow" id="prev" title="Previous slide (←)">‹</button>
+    <button class="btn nav-arrow" id="next" title="Next slide (→)">›</button>
+    <button class="btn" onclick="window.print()" title="Print / Save as PDF">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+      PDF
+    </button>
+  </div>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════ 01 — TITLE ═══════════ -->
+  <section class="slide active" id="s1">
+    <div class="brand-bg"></div>
+    <div class="bg-decor">
+      <div class="blob blob-green" style="width: 520px; height: 520px; top: -160px; right: -180px;"></div>
+      <div class="blob blob-blue" style="width: 420px; height: 420px; bottom: -140px; left: -160px;"></div>
+      <div class="dot-grid" style="top: 12%; right: 8%; width: 220px; height: 220px;"></div>
+      <div class="ring-decor" style="width: 360px; height: 360px; top: 50%; right: -80px; transform: translateY(-50%);"></div>
+    </div>
+    <span class="num">01 / 10</span>
+    <div class="inner">
+      <div class="hero-badge"><span class="dot"></span> Demo live</div>
+      <h1>CirclePay</h1>
+      <p class="lead">Rotating savings, done right. One screen. No notebooks. No chasing.</p>
+
+      <div class="stat-strip">
+        <div class="stat">
+          <div class="val">Millions</div>
+          <div class="cap">Already save this way</div>
+        </div>
+        <div class="stat">
+          <div class="val">$3.5B</div>
+          <div class="cap">Nigeria bills, 2024</div>
+        </div>
+        <div class="stat">
+          <div class="val">1 tap</div>
+          <div class="cap">To mark a member paid</div>
+        </div>
+      </div>
+
+      <div class="hero-links">
+        <span>🔗 <b>circle-pay-op1z.onrender.com</b></span>
+        <span>🐦 <b>@circlepay</b></span>
+        <span>⚡ <b>Browser-first</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 02 — FOUNDER-PRODUCT FIT ═══════════ -->
+  <section class="slide" id="s2">
+    <div class="bg-decor">
+      <div class="blob blob-green" style="width: 380px; height: 380px; top: -100px; left: -140px;"></div>
+      <div class="line-grid" style="top: 0; right: 0; width: 45%; height: 100%;"></div>
+      <div class="dot-grid" style="bottom: 8%; left: 6%; width: 180px; height: 180px;"></div>
+    </div>
+    <span class="num">02 / 10</span>
+    <div class="inner">
+      <p class="kicker">Founder–Product Fit</p>
+      <h2>Built from the notebook.<br>Not from a boardroom.</h2>
+
+      <div class="founder-note" style="font-size: 1.05rem;">
+        I grew up around ajo circles.<br>
+        The trust was real. The record-keeping wasn’t.<br>
+        One late payer. One dispute. The whole circle wobbles.
+      </div>
+
+      <div class="grid g3" style="margin-top: 1.6rem;">
+        <div class="card">
+          <div class="label">Observed</div>
+          <h3>Chasing is the job</h3>
+          <p>More time chasing than anything else.</p>
+        </div>
+        <div class="card">
+          <div class="label">Observed</div>
+          <h3>Order disputes</h3>
+          <p>“Who’s next?” — the #1 argument.</p>
+        </div>
+        <div class="card">
+          <div class="label">Observed</div>
+          <h3>No clean history</h3>
+          <p>Cycle ends. Record disappears.</p>
+        </div>
+      </div>
+
+      <div class="stat-strip" style="margin-top: 1.1rem;">
+        <div class="stat"><div class="val">3</div><div class="cap">Pain points solved</div></div>
+        <div class="stat"><div class="val">1</div><div class="cap">Screen per circle</div></div>
+        <div class="stat"><div class="val">0</div><div class="cap">Notebooks needed</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 03 — PROBLEM / SOLUTION ═══════════ -->
+  <section class="slide" id="s3">
+    <div class="bg-decor">
+      <div class="blob blob-blue" style="width: 460px; height: 460px; top: 50%; right: -200px; transform: translateY(-50%);"></div>
+      <div class="blob blob-green" style="width: 300px; height: 300px; bottom: -80px; left: -100px;"></div>
+      <div class="dot-grid" style="top: 10%; left: 8%; width: 160px; height: 160px;"></div>
+      <div class="ring-decor" style="width: 280px; height: 280px; bottom: 10%; right: 10%; opacity: 0.5;"></div>
+    </div>
+    <span class="num">03 / 10</span>
+    <div class="inner">
+      <p class="kicker">Problem–Solution</p>
+      <h2>Real money.<br>Notebook infrastructure.</h2>
+
+      <div class="ps">
+        <div class="ps-card problem">
+          <div class="tag">Problem</div>
+          <p class="punch">Chasing. Disputes. No record.</p>
+          <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--muted);">WhatsApp groups and memory. One late payer poisons the round.</p>
+        </div>
+        <div class="ps-card solution">
+          <div class="tag">Solution</div>
+          <p class="punch">One ring. One gate. One history.</p>
+          <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--muted);">Payout disabled until everyone pays. Order is explicit.</p>
+        </div>
+      </div>
+
+      <ul class="list" style="margin-top: 1.4rem;">
+        <li><span class="m green">✓</span><div><strong>Create</strong> — name, amount, cadence, members.</div></li>
+        <li><span class="m green">✓</span><div><strong>Track</strong> — one tap per member. Ring fills live.</div></li>
+        <li><span class="m green">✓</span><div><strong>Gate</strong> — payout locked until everyone pays.</div></li>
+        <li><span class="m blue">✓</span><div><strong>Roll over</strong> — due dates, overdue flags, history.</div></li>
+        <li><span class="m blue">✓</span><div><strong>Scale</strong> — many circles, one app.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════ 04 — CUSTOMER-MARKET ═══════════ -->
+  <section class="slide" id="s4">
+    <div class="bg-decor">
+      <div class="blob blob-gold" style="width: 400px; height: 400px; top: -120px; right: -120px;"></div>
+      <div class="blob blob-green" style="width: 340px; height: 340px; bottom: -100px; left: -120px;"></div>
+      <div class="line-grid" style="top: 0; left: 0; width: 40%; height: 100%;"></div>
+      <div class="dot-grid" style="bottom: 12%; right: 8%; width: 200px; height: 200px;"></div>
+    </div>
+    <span class="num">04 / 10</span>
+    <div class="inner">
+      <p class="kicker">Customer–Market</p>
+      <h2>Who it’s for.<br>How big the room is.</h2>
+
+      <div class="grid g4" style="margin-top: 1.2rem;">
+        <div class="card"><div class="label">Retail</div><h3>Organizers</h3><p>Running 2–3 circles.</p></div>
+        <div class="card"><div class="label">Retail</div><h3>Members</h3><p>Want their own status.</p></div>
+        <div class="card"><div class="label">Business</div><h3>Cooperatives</h3><p>Formalizing savings groups.</p></div>
+        <div class="card"><div class="label">Business</div><h3>Fintechs</h3><p>Embedding circles via API.</p></div>
+      </div>
+
+      <div class="stat-strip" style="margin-top: 1.2rem;">
+        <div class="stat"><div class="val">$3.5B</div><div class="cap">Nigeria bills, 2024</div></div>
+        <div class="stat"><div class="val">Millions</div><div class="cap">Active participants</div></div>
+        <div class="stat"><div class="val">~60%</div><div class="cap">West Africa uses informal savings</div></div>
+        <div class="stat"><div class="val">1M+</div><div class="cap">Circles offline today</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 05 — GTM & TRACTION ═══════════ -->
+  <section class="slide" id="s5">
+    <div class="bg-decor">
+      <div class="blob blob-green" style="width: 420px; height: 420px; top: 50%; left: -180px; transform: translateY(-50%);"></div>
+      <div class="blob blob-blue" style="width: 380px; height: 380px; bottom: -120px; right: -140px;"></div>
+      <div class="dot-grid" style="top: 8%; right: 10%; width: 180px; height: 180px;"></div>
+      <div class="ring-decor" style="width: 320px; height: 320px; top: 50%; right: -60px; transform: translateY(-50%); opacity: 0.6;"></div>
+    </div>
+    <span class="num">05 / 10</span>
+    <div class="inner">
+      <p class="kicker">Go-To-Market & Traction</p>
+      <h2>How it spreads.<br>What’s moving.</h2>
+
+      <div class="grid g4" style="margin-top: 1.2rem;">
+        <div class="card"><div class="label">GTM 01</div><h3>Community-led</h3><p>One organizer = one circle.</p></div>
+        <div class="card"><div class="label">GTM 02</div><h3>Loyalty</h3><p>Streaks reinforce trust.</p></div>
+        <div class="card"><div class="label">GTM 03</div><h3>Credit</h3><p>History unlocks mini-loans.</p></div>
+        <div class="card"><div class="label">GTM 04</div><h3>Partnerships</h3><p>Coops and agent networks.</p></div>
+      </div>
+
+      <p class="kicker" style="margin-top: 1.6rem; margin-bottom: 0.6rem;">Traction</p>
+      <div class="stat-strip">
+        <div class="stat"><div class="val">Live</div><div class="cap">Working demo published</div></div>
+        <div class="stat"><div class="val">2</div><div class="cap">Payment integration points</div></div>
+        <div class="stat"><div class="val">100%</div><div class="cap">Core round logic built</div></div>
+        <div class="stat"><div class="val">0</div><div class="cap">Rewrites to go live</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 06 — BUSINESS MODEL ═══════════ -->
+  <section class="slide" id="s6">
+    <div class="bg-decor">
+      <div class="blob blob-gold" style="width: 440px; height: 440px; top: -140px; left: 30%;"></div>
+      <div class="dot-grid" style="bottom: 10%; right: 8%; width: 220px; height: 220px;"></div>
+      <div class="line-grid" style="top: 0; right: 0; width: 30%; height: 100%;"></div>
+    </div>
+    <span class="num">06 / 10</span>
+    <div class="inner">
+      <p class="kicker">Business Model</p>
+      <h2>Three lines.<br>One engine.</h2>
+
+      <div class="grid g3" style="margin-top: 1.2rem;">
+        <div class="card"><div class="big">1–2%</div><div class="label" style="margin-top: 0.35rem;">Per payment</div><p>Scales with volume.</p></div>
+        <div class="card"><div class="big gold">5–10%</div><div class="label" style="margin-top: 0.35rem;">Loan interest</div><p>Highest-margin product.</p></div>
+        <div class="card"><div class="big blue">B2B</div><div class="label" style="margin-top: 0.35rem;">API access</div><p>One deal = many circles.</p></div>
+      </div>
+
+      <ul class="list" style="margin-top: 1.4rem;">
+        <li><span class="m green">$</span><div><strong>Payments first.</strong> Scales with volume, not headcount.</div></li>
+        <li><span class="m gold">$</span><div><strong>Credit upsells.</strong> Reliable payers → mini-loans.</div></li>
+        <li><span class="m blue">$</span><div><strong>B2B multiplies.</strong> One coop = many circles.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════ 07 — COMPETITIVE ADVANTAGE ═══════════ -->
+  <section class="slide" id="s7">
+    <div class="bg-decor">
+      <div class="blob blob-blue" style="width: 400px; height: 400px; top: 50%; right: -160px; transform: translateY(-50%);"></div>
+      <div class="blob blob-green" style="width: 340px; height: 340px; bottom: -100px; left: -120px;"></div>
+      <div class="ring-decor" style="width: 300px; height: 300px; top: 15%; left: 5%; opacity: 0.5;"></div>
+      <div class="dot-grid" style="bottom: 12%; right: 10%; width: 160px; height: 160px;"></div>
+    </div>
+    <span class="num">07 / 10</span>
+    <div class="inner">
+      <p class="kicker">Competitive Advantage</p>
+      <h2>Hard to copy.<br>Harder to replace.</h2>
+
+      <div class="grid g2" style="margin-top: 1.2rem;">
+        <div class="card"><div class="label">01</div><h3>Circle-native</h3><p>Built around the ring. Not bolted on.</p></div>
+        <div class="card"><div class="label">02</div><h3>Payout gating</h3><p>The rule is the interface.</p></div>
+        <div class="card"><div class="label">03</div><h3>Credit signals</h3><p>History becomes a score.</p></div>
+        <div class="card"><div class="label">04</div><h3>Loyalty layer</h3><p>Streaks keep both sides in.</p></div>
+      </div>
+
+      <div class="ps-card solution" style="margin-top: 1.2rem;">
+        <div class="tag">The core bet</div>
+        <p class="punch" style="font-size: 1.05rem;">The hard part is behind us.</p>
+        <p style="margin-top: 0.4rem; font-size: 0.9rem; color: var(--muted);">Round logic built. Payment seam = 1 object, 2 functions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 08 — ROADMAP ═══════════ -->
+  <section class="slide" id="s8">
+    <div class="bg-decor">
+      <div class="blob blob-green" style="width: 380px; height: 380px; top: -100px; right: 20%;"></div>
+      <div class="line-grid" style="top: 0; left: 0; width: 28%; height: 100%;"></div>
+      <div class="dot-grid" style="top: 15%; right: 6%; width: 140px; height: 140px;"></div>
+    </div>
+    <span class="num">08 / 10</span>
+    <div class="inner">
+      <p class="kicker">Roadmap</p>
+      <h2>From demo to product.<br>Next 12 months.</h2>
+
+      <div class="timeline">
+        <div class="tl done"><span class="q">Done · 2026</span><h3>Working demo</h3><p>Circle creation, tracking, gated payouts, history, multi-circle.</p></div>
+        <div class="tl next"><span class="q">Q4 2026</span><h3>Backend + member logins</h3><p>Server-side data. Real accounts. Per-member payment.</p></div>
+        <div class="tl next"><span class="q">Q1 2027</span><h3>Payment integration + loyalty</h3><p>Wire <code>Wallet</code> to a real API. Ship streaks and rewards.</p></div>
+        <div class="tl later"><span class="q">Q2 2027</span><h3>Reminders + credit scoring</h3><p>SMS / WhatsApp nudges. On-time history → credit signal.</p></div>
+        <div class="tl later"><span class="q">Q3 2027</span><h3>Agent + coop partnerships</h3><p>Circles embedded in partner apps and networks.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 09 — TEAM ═══════════ -->
+  <section class="slide" id="s9">
+    <div class="bg-decor">
+      <div class="blob blob-green" style="width: 360px; height: 360px; top: -80px; left: -120px;"></div>
+      <div class="blob blob-gold" style="width: 320px; height: 320px; bottom: -100px; right: -100px;"></div>
+      <div class="dot-grid" style="top: 10%; right: 8%; width: 170px; height: 170px;"></div>
+      <div class="ring-decor" style="width: 260px; height: 260px; bottom: 10%; left: 5%; opacity: 0.5;"></div>
+    </div>
+    <span class="num">09 / 10</span>
+    <div class="inner">
+      <p class="kicker">Team</p>
+      <h2>Small team.<br>Shipping fast.</h2>
+
+      <div class="grid g2" style="margin-top: 1.2rem;">
+        <div class="team-card">
+          <div class="avatar">F</div>
+          <div>
+            <h3>Victor Ifeanyi Okoli</h3>
+            <div class="role">Founder & Engineer</div>
+            <p>Built the demo end-to-end. Grew up around ajo.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="kicker" style="margin-top: 1.4rem; margin-bottom: 0.6rem;">Hiring next</p>
+      <div class="grid g3">
+        <div class="card"><h3>Backend engineer</h3><p>Server + payments.</p></div>
+        <div class="card"><h3>Growth / community</h3><p>Organizer-led GTM.</p></div>
+        <div class="card"><h3>Advisor — fintech</h3><p>Compliance + credit.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 10 — CLOSE ═══════════ -->
+  <section class="slide close" id="s10">
+    <div class="brand-bg"></div>
+    <div class="bg-decor">
+      <div class="blob blob-green" style="width: 500px; height: 500px; top: -180px; left: 50%; transform: translateX(-50%);"></div>
+      <div class="blob blob-blue" style="width: 400px; height: 400px; bottom: -140px; left: 10%;"></div>
+      <div class="blob blob-gold" style="width: 340px; height: 340px; bottom: -100px; right: 5%;"></div>
+      <div class="dot-grid" style="top: 15%; left: 8%; width: 180px; height: 180px;"></div>
+      <div class="dot-grid" style="bottom: 15%; right: 8%; width: 180px; height: 180px;"></div>
+    </div>
+    <span class="num">10 / 10</span>
+    <div class="inner">
+      <h1>The trust is already there.<br>The tooling isn’t.</h1>
+      <p class="lead">We built the tooling. Try the demo.</p>
+
+      <div class="stat-strip" style="max-width: 520px; margin: 1.4rem auto 0;">
+        <div class="stat"><div class="val">1 tap</div><div class="cap">To try it</div></div>
+        <div class="stat"><div class="val">0</div><div class="cap">Setup needed</div></div>
+      </div>
+
+      <div class="contact">
+        <span>👤 Victor Ifeanyi Okoli</span>
+        <span>✉️ ifeanyivictor615@gmail.com</span>
+        <span><a href="https://circle-pay-op1z.onrender.com/" target="_blank">🔗 circle-pay-op1z.onrender.com</a></span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('dots');
+  const progress = document.getElementById('progress');
+  let current = 0;
+
+  slides.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', `Go to slide ${i + 1}`);
+    b.addEventListener('click', () => go(i));
+    dotsWrap.appendChild(b);
+  });
+  const dots = Array.from(dotsWrap.children);
+
+  function go(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    progress.style.width = ((current + 1) / slides.length * 100) + '%';
+    const inner = slides[current].querySelector('.inner');
+    if (inner) inner.scrollTop = 0;
+  }
+
+  document.getElementById('prev').addEventListener('click', () => go(current - 1));
+  document.getElementById('next').addEventListener('click', () => go(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault(); go(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+      e.preventDefault(); go(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); go(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); go(slides.length - 1);
+    }
+  });
+
+  let touchX = null;
+  document.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 60) go(dx < 0 ? current + 1 : current - 1);
+    touchX = null;
+  }, { passive: true });
+
+  dots[current].classList.add('active');
+  progress.style.width = (1 / slides.length * 100) + '%';
+</script>
+
+</body>
+</html>
