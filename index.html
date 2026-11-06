@@ -301,6 +301,16 @@
     backdrop-filter: blur(8px);
   }
 
+  .hero-badge-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .hero-badge-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
   .hero-badge .dot {
     width: 6px; height: 6px;
     border-radius: 50%;
@@ -738,7 +748,9 @@
     </div>
     <span class="num">01 / 10</span>
     <div class="inner">
-      <div class="hero-badge"><span class="dot"></span> Demo live</div>
+      <a class="hero-badge hero-badge-link" href="https://youtu.be/62EqGetJrlk" target="_blank" rel="noopener noreferrer" aria-label="Watch the CirclePay demo video">
+        <span class="dot"></span> Demo live
+      </a>
       <h1>CirclePay</h1>
       <p class="lead">Rotating savings, done right. One screen. No notebooks. No chasing.</p>
 
@@ -1026,7 +1038,7 @@
     <span class="num">10 / 10</span>
     <div class="inner">
       <h1>The trust is already there.<br>The tooling isn’t.</h1>
-      <p class="lead">We built the tooling. Try the demo.</p>
+      <p class="lead">We built the tooling. Watch the demo or try it yourself.</p>
 
       <div class="stat-strip" style="max-width: 520px; margin: 1.4rem auto 0;">
         <div class="stat"><div class="val">1 tap</div><div class="cap">To try it</div></div>
@@ -1036,6 +1048,7 @@
       <div class="contact">
         <span>👤 Victor Ifeanyi Okoli</span>
         <span>✉️ ifeanyivictor615@gmail.com</span>
+        <span><a href="https://youtu.be/62EqGetJrlk" target="_blank" rel="noopener noreferrer">▶ Watch demo video</a></span>
         <span><a href="https://circle-pay-op1z.onrender.com/" target="_blank">🔗 circle-pay-op1z.onrender.com</a></span>
       </div>
     </div>
